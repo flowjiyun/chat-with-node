@@ -1,11 +1,25 @@
 import express from "express";
+import http from "http";
+import WebSocket from "ws";
 const app = express();
 
 app.set("view engine", "pug");
 app.set("views", __dirname + "/views");
 app.use("/public", express.static(__dirname + "/public"));
-console.log(__dirname);
 app.get("/", (req, res) => res.render("home"));
 app.get("/*", (req, res) => res.redirect("/"));
-const handelListen = () => console.log("Listening on http://localhost:3000");
-app.listen(3000, handelListen);
+const handleListen = () => console.log("Listening on http://localhost:3000");
+
+// make http server with nodejs http module
+const server = http.createServer(app);
+
+// make websocket server with ws package on top of http server
+const wss = new WebSocket.Server({ server });
+
+function handleConnection(socket) {
+  console.log(socket);
+}
+
+wss.on("connection", handleConnection);
+
+server.listen(3000, handleListen);
