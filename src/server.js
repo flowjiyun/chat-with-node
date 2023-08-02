@@ -16,10 +16,13 @@ const server = http.createServer(app);
 // make websocket server with ws package on top of http server
 const wss = new WebSocket.Server({ server });
 
-function handleConnection(socket) {
-  console.log(socket);
-}
-
-wss.on("connection", handleConnection);
+wss.on("connection", (socket) => {
+  console.log("connected to client");
+  socket.on("close", () => console.log("disconnected from client"));
+  socket.on("message", (message) => {
+    console.log(message.toString(), "from client");
+  });
+  socket.send("hello i'm server");
+});
 
 server.listen(3000, handleListen);
