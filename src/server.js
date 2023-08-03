@@ -15,8 +15,39 @@ const handleListen = () => console.log("Listening on http://localhost:3000");
 const httpServer = http.createServer(app);
 const wsServer = SocketIo(httpServer);
 
+function getRoomList(key) {
+  const {
+    sockets: {
+      adapter: { rooms, sids },
+    },
+  } = wsServer;
+  const roomList = [];
+  rooms.forEach((_, key) => {
+    if (sids.get(key) === undefined) {
+      roomList.push(key);
+    }
+  });
+  return roomList;
+}
+
 wsServer.on("connection", (socket) => {
-  console.log(socket);
+  // weclome message when join room
+  // when join room
+  socket.on("joinRoom", (roomName, done) => {
+    socket.join(roomName);
+    console.log(`${socket.id} join in ${roomName}`);
+    done();
+  });
+
+  socket.on("setNickname", (nickname, done) => {
+    socket["nickname"] = nickname;
+    done();
+  });
+
+  socket.on("newMessage", (msg, roomName, nickname, done) => {
+    socket.to(roomName).emit("newMessage", msg, nickname);
+    done();
+  });
 });
 
 // const wss = new WebSocket.Server({ server });
