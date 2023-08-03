@@ -1,6 +1,7 @@
 import express from "express";
 import http from "http";
 import WebSocket from "ws";
+import SocketIo from "socket.io";
 const app = express();
 
 app.set("view engine", "pug");
@@ -11,29 +12,33 @@ app.get("/*", (req, res) => res.redirect("/"));
 const handleListen = () => console.log("Listening on http://localhost:3000");
 
 // make http server with nodejs http module
-const server = http.createServer(app);
+const httpServer = http.createServer(app);
+const wsServer = SocketIo(httpServer);
 
-// make websocket server with ws package on top of http server
-const wss = new WebSocket.Server({ server });
-
-const sockets = [];
-
-wss.on("connection", (socket) => {
-  console.log("connected to client");
-  sockets.push(socket);
-  socket["nickname"] = "anon";
-  socket.on("close", () => console.log("disconnected from client"));
-  socket.on("message", (message) => {
-    const parsed = JSON.parse(message);
-    switch (parsed.type) {
-      case "message":
-        sockets.forEach((aSocket) =>
-          aSocket.send(`${socket.nickname} : ${parsed.payload}`)
-        );
-      case "nickname":
-        socket["nickname"] = parsed.payload;
-    }
-  });
+wsServer.on("connection", (socket) => {
+  console.log(socket);
 });
 
-server.listen(3000, handleListen);
+// const wss = new WebSocket.Server({ server });
+
+// const sockets = [];
+
+// wss.on("connection", (socket) => {
+//   console.log("connected to client");
+//   sockets.push(socket);
+//   socket["nickname"] = "anon";
+//   socket.on("close", () => console.log("disconnected from client"));
+//   socket.on("message", (message) => {
+//     const parsed = JSON.parse(message);
+//     switch (parsed.type) {
+//       case "message":
+//         sockets.forEach((aSocket) =>
+//           aSocket.send(`${socket.nickname} : ${parsed.payload}`)
+//         );
+//       case "nickname":
+//         socket["nickname"] = parsed.payload;
+//     }
+//   });
+// });
+
+httpServer.listen(3000, handleListen);
