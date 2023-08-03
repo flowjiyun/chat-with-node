@@ -15,7 +15,7 @@ const handleListen = () => console.log("Listening on http://localhost:3000");
 const httpServer = http.createServer(app);
 const wsServer = SocketIo(httpServer);
 
-function getRoomList(key) {
+function getRoomList() {
   const {
     sockets: {
       adapter: { rooms, sids },
@@ -37,6 +37,10 @@ wsServer.on("connection", (socket) => {
     socket.join(roomName);
     console.log(`${socket.id} join in ${roomName}`);
     done();
+    wsServer.sockets.emit("roomChange", getRoomList());
+  });
+  socket.on("disconnect", () => {
+    wsServer.sockets.emit("roomChange", getRoomList());
   });
 
   socket.on("setNickname", (nickname, done) => {

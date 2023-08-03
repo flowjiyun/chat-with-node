@@ -61,3 +61,15 @@ messageForm.addEventListener("submit", (event) => {
 socket.on("newMessage", (msg, nickname) => {
   addMessage(`${nickname}: ${msg}`);
 });
+socket.on("roomChange", (rooms) => {
+  const ul = document.querySelector("#room ul");
+  ul.innerHTML = "";
+  if (rooms.length === 0) {
+    return;
+  }
+  rooms.forEach((room) => {
+    const li = document.createElement("li");
+    li.innerText = room;
+    ul.appendChild(li);
+  });
+});
